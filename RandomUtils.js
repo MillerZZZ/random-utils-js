@@ -100,12 +100,18 @@ class RandomUtils {
      * @public
      * @function
      * @param {number} value - The new exclusive upper bound for random integers. Must be greater than 0.
+     * @throws {TypeError} If value is not a number.
+     * @throws {RangeError} If value is less than or equal to 0.
      * @description Sets the range for the randomInt() method.
      * For example, if value is 100, randomInt() will generate integers from 0 to 99.
      */
     static setRange = (value) => {
-        if (value > 0)
-            this.#randomIntRange = value;
+        // Check if the value is a number and greater than 0
+        if (typeof value !== 'number')
+            throw new TypeError('Value must be a number.');
+        if (value < 1)
+            throw new RangeError('Value must be greater than 0.');
+        this.#randomIntRange = value;
     }
 
     /**
