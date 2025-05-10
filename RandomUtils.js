@@ -71,7 +71,7 @@ class RandomUtils {
      * @description Generates a random 32-bit unsigned integer using Math.random().
      * This is a fallback if Web Crypto API is not available.
      */
-    static #baseOnMath = () => Math.floor(Math.random() * this.#UINT32_MAX + 1);
+    static #baseOnMath = () => Math.floor(Math.random() * (this.#UINT32_MAX + 1));
 
     /**
      * @static
