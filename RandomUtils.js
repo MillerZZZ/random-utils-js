@@ -36,6 +36,22 @@ class RandomUtils {
     /**
      * @static
      * @private
+     * @type {number}
+     * @description Range size of letters (a-z).
+     */
+    static #LETTER_RANGE_SIZE = 26;
+
+    /**
+     * @static
+     * @private
+     * @type {number}
+     * @description Range size of digits (0-9).
+     */
+    static #DIGIT_RANGE_MAX = 10;
+
+    /**
+     * @static
+     * @private
      * @type {boolean}
      * @description Flag indicating if the Web Crypto API is available.
      */
@@ -105,11 +121,31 @@ class RandomUtils {
      * @static
      * @private
      * @function
-     * @returns {number} The largest multiple of #randomIntRange that is less than or equal to #UINT32_MAX.
+     * @returns {number} The largest multiple of #randomIntRange that is less than or equal to #UINT32_MAX + 1.
      * @description Calculates the maximum valid value for the base random number before modulo,
      * to ensure an unbiased distribution for randomInt().
      */
-    static #maxValidValue = () => Math.floor(this.#UINT32_MAX / this.#randomIntRange) * this.#randomIntRange;
+    static #RandomIntUnbiasedRange = () => Math.floor((this.#UINT32_MAX + 1) / this.#randomIntRange) * this.#randomIntRange;
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} The largest multiple of #LETTER_MAX that is less than or equal to #UINT32_MAX + 1.
+     * @description Calculates the maximum valid value for the base random number before modulo,
+     * to ensure an unbiased distribution for randomLetter().
+     */
+    static #RandomLetterUnbiasedRange = () => Math.floor((this.#UINT32_MAX + 1) / this.#LETTER_RANGE_SIZE) * this.#LETTER_RANGE_SIZE;
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} The largest multiple of #DIGIT_MAX that is less than or equal to #UINT32_MAX + 1.
+     * @description Calculates the maximum valid value for the base random number before modulo,
+     * to ensure an unbiased distribution for randomDigit().
+     */
+    static #RandomDigitUnbiasedRange = () => Math.floor((this.#UINT32_MAX + 1) / this.#DIGIT_RANGE_MAX) * this.#DIGIT_RANGE_MAX;
 
     /**
      * @static
@@ -149,7 +185,7 @@ class RandomUtils {
      */
     static randomInt = () => {
         let randomVal;
-        const currentMaxValid = this.#maxValidValue(); // Cache the value
+        const currentMaxValid = this.#RandomIntUnbiasedRange(); // Cache the value
         do
             randomVal = this.#base();
         while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
@@ -164,8 +200,16 @@ class RandomUtils {
      * @function
      * @returns {string} A random lowercase letter ('a' through 'z').
      * @description Generates a random lowercase English letter.
+     * Uses a rejection sampling method to avoid modulo bias.
      */
-    static randomLetter = () => String.fromCharCode('a'.charCodeAt(0) + this.#base() % 26);
+    static randomLetter = () => {
+        let randomVal;
+        const currentMaxValid = this.#RandomLetterUnbiasedRange(); // Cache the value
+        do
+            randomVal = this.#base();
+        while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
+        return String.fromCharCode('a'.charCodeAt(0) + randomVal % this.#LETTER_RANGE_SIZE);
+    }
 
     /**
      * @static
@@ -173,6 +217,14 @@ class RandomUtils {
      * @function
      * @returns {string} A random digit character ('0' through '9').
      * @description Generates a random digit character.
+     * Uses a rejection sampling method to avoid modulo bias.
      */
-    static randomDigit = () => String.fromCharCode('0'.charCodeAt(0) + this.#base() % 10);
+    static randomDigit = () => {
+        let randomVal;
+        const currentMaxValid = this.#RandomDigitUnbiasedRange(); // Cache the value
+        do
+            randomVal = this.#base();
+        while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
+        return String.fromCharCode('0'.charCodeAt(0) + randomVal % this.#DIGIT_RANGE_MAX);
+    }
 }
