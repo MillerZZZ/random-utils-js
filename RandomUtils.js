@@ -55,7 +55,7 @@ class RandomUtils {
      * @type {boolean}
      * @description Flag indicating if the Web Crypto API is available.
      */
-    static #isCryptoAvailable = typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues;
+    static #isCryptoAvailable = !!(typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues);
 
     /**
      * @static
