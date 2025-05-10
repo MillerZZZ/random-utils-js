@@ -154,7 +154,7 @@ class RandomUtils {
             randomVal = this.#base();
         while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
         if (currentMaxValid === 0)
-            return this.#base % this.#randomIntRange;
+            return this.#base() % this.#randomIntRange;
         return randomVal % this.#randomIntRange;
     }
 
