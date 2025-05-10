@@ -1,0 +1,156 @@
+'use strict';
+
+/**
+ * @class RandomUtils
+ * @description A utility class for generating random numbers and characters.
+ * It attempts to use cryptographically secure random number generation if available,
+ * otherwise falls back to Math.random().
+ */
+class RandomUtils {
+    // essentials for the random base
+
+    /**
+     * @static
+     * @private
+     * @type {number}
+     * @description Maximum value for an unsigned 32-bit integer.
+     */
+    static #UINT32_MAX = 0xFFFFFFFF;
+
+    /**
+     * @static
+     * @private
+     * @type {boolean}
+     * @description Flag indicating if the Web Crypto API is available.
+     */
+    static #isCryptoAvailable = typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues;
+
+    /**
+     * @static
+     * @private
+     * @type {Uint32Array}
+     * @description Buffer for storing random values from the Web Crypto API.
+     */
+    static #buffer = new Uint32Array(1);
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} A 32-bit random integer generated using window.crypto.
+     * @description Generates a random 32-bit unsigned integer using the Web Crypto API.
+     */
+    static #baseOnCrypto = () => {
+        let randomVal;
+        window.crypto.getRandomValues(this.#buffer);
+        randomVal = this.#buffer[0];
+        return randomVal;
+    }
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} A 32-bit random integer generated using Math.random().
+     * @description Generates a random 32-bit unsigned integer using Math.random().
+     * This is a fallback if Web Crypto API is not available.
+     */
+    static #baseOnMath = () => Math.floor(Math.random() * this.#UINT32_MAX + 1);
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} A 32-bit random integer from the selected base generator.
+     * @description Selects the appropriate base random number generator (crypto or math).
+     */
+    static #base = this.#isCryptoAvailable ? this.#baseOnCrypto : this.#baseOnMath;
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @returns {number} A 32-bit unsigned random integer.
+     * @description Provides a base 32-bit unsigned random integer.
+     * It uses cryptographically secure generation if available, otherwise Math.random().
+     */
+    static randomBase = () => this.#base();
+
+    /**
+     * @static
+     * @private
+     * @type {number}
+     * @description The upper exclusive bound for the randomInt() method.
+     * Default is 0x7FFF (32767), meaning randomInt() will generate numbers from 0 to 32766.
+     */
+    static #randomIntRange = 0x7FFF;    // C-style random range
+
+    /**
+     * @static
+     * @private
+     * @function
+     * @returns {number} The largest multiple of #randomIntRange that is less than or equal to #UINT32_MAX.
+     * @description Calculates the maximum valid value for the base random number before modulo,
+     * to ensure an unbiased distribution for randomInt().
+     */
+    static #maxValidValue = () => Math.floor(this.#UINT32_MAX / this.#randomIntRange) * this.#randomIntRange;
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @param {number} value - The new exclusive upper bound for random integers. Must be greater than 0.
+     * @description Sets the range for the randomInt() method.
+     * For example, if value is 100, randomInt() will generate integers from 0 to 99.
+     */
+    static setRange = (value) => {
+        if (value > 0)
+            this.#randomIntRange = value;
+    }
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @returns {number} The current exclusive upper bound for randomInt().
+     * @description Gets the current range (exclusive upper bound) for the randomInt() method.
+     */
+    static getRange = () => this.#randomIntRange;
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @returns {number} A random integer between 0 (inclusive) and the current range (exclusive).
+     * @description Generates a random integer within the range [0, getRange() - 1].
+     * Uses a rejection sampling method to avoid modulo bias.
+     */
+    static randomInt = () => {
+        let randomVal;
+        const currentMaxValid = this.#maxValidValue(); // Cache the value
+        do
+            randomVal = this.#base();
+        while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
+        if (currentMaxValid === 0)
+            return this.#base % this.#randomIntRange;
+        return randomVal % this.#randomIntRange;
+    }
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @returns {string} A random lowercase letter ('a' through 'z').
+     * @description Generates a random lowercase English letter.
+     */
+    static randomLetter = () => String.fromCharCode('a'.charCodeAt(0) + this.#base() % 26);
+
+    /**
+     * @static
+     * @public
+     * @function
+     * @returns {string} A random digit character ('0' through '9').
+     * @description Generates a random digit character.
+     */
+    static randomDigit = () => String.fromCharCode('0'.charCodeAt(0) + this.#base() % 10);
+}
