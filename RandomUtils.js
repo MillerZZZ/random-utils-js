@@ -52,7 +52,7 @@ class RandomUtils {
      * @type {number}
      * @description Range size of digits (0-9).
      */
-    static #DIGIT_RANGE_MAX = 10;
+    static #DIGIT_RANGE_SIZE = 10;
 
     /**
      * @static
@@ -150,7 +150,7 @@ class RandomUtils {
      * @description Calculates the maximum valid value for the base random number before modulo,
      * to ensure an unbiased distribution for randomDigit().
      */
-    static #RandomDigitUnbiasedRange = () => Math.floor((this.#UINT32_MAX + 1) / this.#DIGIT_RANGE_MAX) * this.#DIGIT_RANGE_MAX;
+    static #RandomDigitUnbiasedRange = () => Math.floor((this.#UINT32_MAX + 1) / this.#DIGIT_RANGE_SIZE) * this.#DIGIT_RANGE_SIZE;
 
     /**
      * @static
@@ -230,6 +230,6 @@ class RandomUtils {
         do
             randomVal = this.#base();
         while (randomVal >= currentMaxValid && currentMaxValid > 0); // Add check for currentMaxValid > 0 to prevent infinite loop if range is too large
-        return String.fromCharCode('0'.charCodeAt(0) + randomVal % this.#DIGIT_RANGE_MAX);
+        return String.fromCharCode('0'.charCodeAt(0) + randomVal % this.#DIGIT_RANGE_SIZE);
     }
 }
