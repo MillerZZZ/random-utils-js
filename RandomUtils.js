@@ -161,6 +161,8 @@ class RandomUtils {
      * @throws {RangeError} If value is less than or equal to 0.
      * @description Sets the range for the randomInt() method.
      * For example, if value is 100, randomInt() will generate integers from 0 to 99.
+     * A warning will be issued if the value significantly exceeds the underlying 32-bit random number generator's maximum,
+     * as this may lead to non-uniform distribution over the entire requested range.
      */
     static setRange = (value) => {
         // Check if the value is a number and greater than 0
@@ -168,6 +170,14 @@ class RandomUtils {
             throw new TypeError('Value must be a number.');
         if (value < 1)
             throw new RangeError('Value must be greater than 0.');
+        if (value > this.#UINT32_MAX + 1)
+            console.warn(
+                'RandomUtils.setRange: The provided range value (${value}) significantly exceeds ' +
+                'the maximum output of the underlying 32-bit random number generator (${RandomUtils.#UINT32_MAX + 1}). ' +
+                'While randomInt() will still produce numbers up to ${RandomUtils.#UINT32_MAX}, ' +
+                'it cannot uniformly cover the entire requested range [0, ${value - 1}]. ' +
+                'The distribution will be uniform only up to ${RandomUtils.#UINT32_MAX}.'
+            );
         this.#randomIntRange = value;
     }
 
