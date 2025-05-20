@@ -172,11 +172,11 @@ class RandomUtils {
             throw new RangeError('Value must be greater than 0.');
         if (value > this.#UINT32_MAX + 1)
             console.warn(
-                'RandomUtils.setRange: The provided range value (${value}) significantly exceeds ' +
-                'the maximum output of the underlying 32-bit random number generator (${RandomUtils.#UINT32_MAX + 1}). ' +
-                'While randomInt() will still produce numbers up to ${RandomUtils.#UINT32_MAX}, ' +
-                'it cannot uniformly cover the entire requested range [0, ${value - 1}]. ' +
-                'The distribution will be uniform only up to ${RandomUtils.#UINT32_MAX}.'
+                `RandomUtils.setRange: The provided range value (${value}) significantly exceeds ` +
+                `the maximum output of the underlying 32-bit random number generator (${this.#UINT32_MAX + 1}). ` +
+                `While randomInt() will still produce numbers up to ${this.#UINT32_MAX}, ` +
+                `it cannot uniformly cover the entire requested range [0, ${value - 1}]. ` +
+                `The distribution will be uniform only up to ${this.#UINT32_MAX}.`
             );
         this.#randomIntRange = value;
     }
